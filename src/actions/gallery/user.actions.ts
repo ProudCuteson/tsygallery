@@ -7,11 +7,11 @@ import { handleError } from "@/lib/utils/gallery";
 import { CreateUserParams, UpdateUserParams } from "@/lib/types/gallery"; // Import or define the type
 
 // CREATE
-export async function createUser(user: CreateUserParams) {
+export async function createUser(id: string , user: CreateUserParams) {
   try {
     await connectDB();
 
-    const newUser = await User.create(user);
+    const newUser = await User.create(id, user);
 
     return JSON.parse(JSON.stringify(newUser));
   } catch (error) {
