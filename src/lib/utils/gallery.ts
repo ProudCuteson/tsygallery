@@ -5,7 +5,7 @@ import qs from "qs";
 import { twMerge } from "tailwind-merge";
 
 import { aspectRatioOptions } from "@/lib/gallery/constants";
-import { FormUrlQueryParams, RemoveUrlQueryParams } from "@/lib/types/gallery";
+import { FormUrlQueryParams, RemoveUrlQueryParams } from "@/lib/types";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));

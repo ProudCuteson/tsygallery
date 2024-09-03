@@ -4,14 +4,14 @@ import { revalidatePath } from "next/cache";
 import User from "@/lib/gallery/database/models/user.model";
 import { connectDB } from "@/lib/gallery/database/mongoose";
 import { handleError } from "@/lib/utils/gallery";
-import { CreateUserParams, UpdateUserParams } from "@/lib/types/gallery"; // Import or define the type
+import { CreateUserParams, UpdateUserParams } from "@/lib/types";
 
 // CREATE
-export async function createUser(id: string , user: CreateUserParams) {
+export async function createUser(user: CreateUserParams) {
   try {
     await connectDB();
 
-    const newUser = await User.create(id, user);
+    const newUser = await User.create(user);
 
     return JSON.parse(JSON.stringify(newUser));
   } catch (error) {

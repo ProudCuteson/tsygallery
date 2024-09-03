@@ -1,5 +1,5 @@
-// ClerkId, email, username, photo, firstname, lastname, planId, creditt
-import { Schema, model, models, Document } from 'mongoose';
+// ClerkId, email, username, photo, firstname, lastname, planId, credits
+import { Schema, model, models} from 'mongoose';
 
 const UserSchema = new Schema({
   clerkId: { type: String, required: true, unique: true },
