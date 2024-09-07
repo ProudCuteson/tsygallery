@@ -4,7 +4,7 @@ const MONGO_URL= process.env.NEXT_PUBLIC_MONGO_URL;
 
 interface MongooseConnection {
   conn: Mongoose | null;
-  promise: Promise<typeof import("mongoose")> | null;
+  promise: Promise<Mongoose> | null;
 }
 
 let cached: MongooseConnection = (global as any).mongoose;
@@ -26,6 +26,7 @@ export const connectDB = async () => {
   cached.promise = cached.promise || mongoose.connect(MONGO_URL, {
     dbName: 'gallery',
     bufferCommands: false,
+    connectTimeoutMS: 50000,
   });
 
   cached.conn = await cached.promise;
