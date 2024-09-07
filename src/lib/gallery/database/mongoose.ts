@@ -10,13 +10,11 @@ interface MongooseConnection {
 let cached: MongooseConnection = (global as any).mongoose;
 
 if (!cached) {
-  cached = { conn: null, promise: null };
-  (global as any).mongoose = cached;
+  cached = (global as any).mongoose = { 
+    conn: null, 
+    promise: null,
+  };
 }
-
-/* if(!cached) {
-  cached = (global as any).mongoose = { conn: null, promise: null };
-} */
 
 export const connectDB = async () => {
   if(cached.conn) return cached.conn;
@@ -26,7 +24,7 @@ export const connectDB = async () => {
   cached.promise = cached.promise || mongoose.connect(MONGO_URL, {
     dbName: 'gallery',
     bufferCommands: false,
-    connectTimeoutMS: 50000,
+    connectTimeoutMS: 30000,
   });
 
   cached.conn = await cached.promise;

@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
 import { Webhook } from 'svix'
 import { headers } from 'next/headers'
-import { WebhookEvent } from '@clerk/nextjs/server'
-import { clerkClient } from '@clerk/nextjs/server';
+import { WebhookEvent, clerkClient } from '@clerk/nextjs/server'
 
 import { createUser, updateUser, deleteUser } from "@/actions/gallery/user.actions";
 
@@ -56,7 +55,7 @@ export async function POST(req: Request) {
   const eventType = evt.type
 
   // Create a new user in mongoDB
-  if (eventType === 'user.created') {
+  if (eventType === "user.created") {
     const { id, email_addresses, username, image_url, first_name, last_name } = evt.data;
 
     const user = {
@@ -67,9 +66,7 @@ export async function POST(req: Request) {
       firstName: first_name,
       lastName: last_name,
     };
-    
-    console.log(user);
-    
+   
     const newUser = await createUser(user);
 
     if(newUser) {
@@ -85,7 +82,7 @@ export async function POST(req: Request) {
   };
 
   // UPDATE
-  if (eventType === "user.updated") {
+  /* if (eventType === "user.updated") {
     const { id, image_url, first_name, last_name, username } = evt.data;
 
     const user = {
@@ -108,7 +105,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ message: "OK", user: deletedUser });
   }
-
+ */
 
   console.log(`Webhook with and ID of ${id} and type of ${eventType}`)
   console.log('Webhook body:', body)
