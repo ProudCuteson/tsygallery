@@ -1,10 +1,9 @@
-import { UserButton } from "@clerk/nextjs";
+import MainHeader from "@/components/shared/MainHeader";
 
 export default function Home() {
   return (
     <div>
-      <h1>Home</h1>
-      <UserButton />
+      <MainHeader />
     </div>
   );
 }

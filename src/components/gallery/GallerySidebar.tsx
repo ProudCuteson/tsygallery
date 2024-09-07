@@ -1,7 +1,6 @@
 'use client'
 import React from 'react'
 import Link from 'next/link'
-import { Home } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
 import { navLinks } from '@/lib/gallery/constants'
 import { SignedIn, SignedOut } from '@clerk/nextjs'
@@ -20,7 +19,7 @@ const GallerySidebar = () => {
       <div className='append'>
         <div className='flex flex-row gap-4'>
           <Link href='/gallery' className='flex gap-3 items-center'>
-            <Home className='size-6 text-green-500 font-bold' /> Home
+            <Image src="/assets/images/logo-text.svg" alt="logo" width={180} height={28} />
           </Link>
         </div>
         <Separator className='my-5' />
@@ -29,7 +28,7 @@ const GallerySidebar = () => {
             {navLinks.map((link) => {
               const isActive = link.route === pathname
               return (
-                <li key={link.route} className={isActive ? 'text-foreground/70' : 'text-foreground/30'}>
+                <li key={link.route} className={isActive ? 'text-foreground' : 'text-foreground/80'}>
                   <Link href={link.route} className='w-full flex item-center gap-2'>
                     <Image
                       src={link.icon}

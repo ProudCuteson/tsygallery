@@ -22,7 +22,7 @@ const GalleryMobileNav = () => {
   
   return (
     <header className='mt-8 flex w-full flex-col items-start gap-5 md:hidden'>
-      <Link href={'/'} className='flex items-center gap-2 md:py-2'>
+      <Link href={'/gallery'} className='flex items-center gap-2 md:py-2'>
         <Image
           src='/assets/images/logo-text.svg'
           alt='logo'
@@ -32,7 +32,7 @@ const GalleryMobileNav = () => {
       </Link>
       <nav className='flex gap-2'>
         <SignedIn>
-          <UserButton afterSignOutUrl='/'/>
+          <UserButton />
           <Sheet>
             <SheetTrigger>
               <Image 

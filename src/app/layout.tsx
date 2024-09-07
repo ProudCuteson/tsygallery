@@ -19,7 +19,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
+    <ClerkProvider afterSignOutUrl={'/'}>
       <html lang="en">
         <body className={inter.className}>
           <ThemeProvider
@@ -28,7 +28,9 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            {children}
+            <main className="min-h-screen w-full">
+              {children}
+            </main>
           </ThemeProvider>
         </body>
       </html>

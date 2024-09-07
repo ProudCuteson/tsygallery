@@ -1,15 +1,7 @@
 /* eslint-disable prefer-const */
 /* eslint-disable no-prototype-builtins */
-import { type ClassValue, clsx } from "clsx";
+import { aspectRatioOptions } from "../constants";
 import qs from "qs";
-import { twMerge } from "tailwind-merge";
-
-import { aspectRatioOptions } from "@/lib/gallery/constants";
-import { FormUrlQueryParams, RemoveUrlQueryParams } from "@/lib/types";
-
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
 
 // ERROR HANDLER
 export const handleError = (error: unknown) => {
@@ -27,6 +19,7 @@ export const handleError = (error: unknown) => {
     throw new Error(`Unknown error: ${JSON.stringify(error)}`);
   }
 };
+
 
 // PLACEHOLDER LOADER - while image is transforming
 const shimmer = (w: number, h: number) => `

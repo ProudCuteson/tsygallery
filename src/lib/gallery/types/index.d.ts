@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
+
 // ====== USER PARAMS
-export type CreateUserParams = {
+declare type CreateUserParams = {
   clerkId: string;
   email: string;
   username: string;
@@ -9,7 +10,7 @@ export type CreateUserParams = {
   photo: string;
 };
 
-export type UpdateUserParams = {
+declare type UpdateUserParams = {
   firstName: string;
   lastName: string;
   username: string;
@@ -17,7 +18,7 @@ export type UpdateUserParams = {
 };
 
 // ====== IMAGE PARAMS
-export type AddImageParams = {
+declare type AddImageParams = {
   image: {
     title: string;
     publicId: string;
@@ -35,7 +36,7 @@ export type AddImageParams = {
   path: string;
 };
 
-export type UpdateImageParams = {
+declare type UpdateImageParams = {
   image: {
     _id: string;
     title: string;
@@ -54,7 +55,7 @@ export type UpdateImageParams = {
   path: string;
 };
 
-export type Transformations = {
+declare type Transformations = {
   restore?: boolean;
   fillBackground?: boolean;
   remove?: {
@@ -71,14 +72,14 @@ export type Transformations = {
 };
 
 // ====== TRANSACTION PARAMS
-export type CheckoutTransactionParams = {
+declare type CheckoutTransactionParams = {
   plan: string;
   credits: number;
   amount: number;
   buyerId: string;
 };
 
-export type CreateTransactionParams = {
+declare type CreateTransactionParams = {
   stripeId: string;
   amount: number;
   credits: number;
@@ -87,7 +88,7 @@ export type CreateTransactionParams = {
   createdAt: Date;
 };
 
-export type TransformationTypeKey =
+declare type TransformationTypeKey =
   | "restore"
   | "fill"
   | "remove"
@@ -95,49 +96,29 @@ export type TransformationTypeKey =
   | "removeBackground";
 
 // ====== URL QUERY PARAMS
-export type FormUrlQueryParams = {
+declare type FormUrlQueryParams = {
   searchParams: string;
   key: string;
   value: string | number | null;
 };
 
-export type UrlQueryParams = {
+declare type UrlQueryParams = {
   params: string;
   key: string;
   value: string | null;
 };
 
-export type RemoveUrlQueryParams = {
+declare type RemoveUrlQueryParams = {
   searchParams: string;
   keysToRemove: string[];
 };
 
-export type SearchParamProps = {
+declare type SearchParamProps = {
   params: { id: string; type: TransformationTypeKey };
   searchParams: { [key: string]: string | string[] | undefined };
 };
 
-export type IImage = {
-  title: string;
-  transformationType: string;
-  publicId: string;
-  secureUrl: string;
-  width?: number;
-  height?: number;
-  config?: object;
-  aspectRatio?: string;
-  color?: string;
-  prompt?: string;
-  author: {
-    _id: string;
-    firstname: string;
-    lastname: string;
-  };
-  createdAt?: Date;
-  updatedAt?: Date;
-}
-
-export type TransformationFormProps = {
+declare type TransformationFormProps = {
   action: "Add" | "Update";
   userId: string;
   type: TransformationTypeKey;
@@ -146,7 +127,7 @@ export type TransformationFormProps = {
   config?: Transformations | null;
 };
 
-export type TransformedImageProps = {
+declare type TransformedImageProps = {
   image: any;
   type: string;
   title: string;
