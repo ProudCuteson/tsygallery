@@ -2,7 +2,7 @@ import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/nextjs'
 
 const MainHeader = () => {
   return (
-    <header className='px-5 h-[64px] bg-muted flex flex-row items-center justify-between'>
+    <header className='px-5 h-[64px] w-full bg-muted flex flex-row items-center justify-between'>
       <h1>My App</h1>
       <SignedIn>
         {/* Mount the UserButton component */}

@@ -1,5 +1,5 @@
 "use server";
-import { revalidatePath } from "next/cache";
+
 import User from "@/lib/gallery/database/models/user.model";
 import { connectDB } from "@/lib/gallery/database/mongoose";
 
@@ -11,6 +11,7 @@ export async function createUser(user: any) {
     const newUser = await User.create(user);
 
     return JSON.parse(JSON.stringify(newUser));
+
   } catch (error) {
     console.log(error);
   }
@@ -62,7 +63,7 @@ export async function deleteUser(clerkId: string) {
 
     // Delete user
     const deletedUser = await User.findByIdAndDelete(userToDelete._id);
-    revalidatePath("/");
+    
 
     return deletedUser ? JSON.parse(JSON.stringify(deletedUser)) : null;
   } catch (error) {

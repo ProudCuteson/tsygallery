@@ -14,7 +14,7 @@ const TransTypeAddPage = async ({ params: { type } }: SearchParamProps) => {
   const { userId } = auth();
   if(!userId) redirect('/sign-in');
 
-  console.log('userId', userId);
+  console.log( userId);
   //This is the db user ID
   const user = await getUserById(userId);
   
@@ -27,7 +27,7 @@ const TransTypeAddPage = async ({ params: { type } }: SearchParamProps) => {
       />
       <TransformationForm 
         action="Add"
-        userId={user._id}
+        userId={user?._id}
         type={transformation.type as TransformationTypeKey}
         creditBalance={user.creditBalance}
       />
