@@ -8,12 +8,12 @@ import {
   FormMessage,
   FormLabel,
 } from "@/components/ui/form";
-import { TransformationFormSchema } from './TransformationForm';
+import { formSchema } from './TransformationForm';
 
 type CustomFieldProps = {
-  control: Control<z.infer<typeof TransformationFormSchema>> | undefined;
+  control: Control<z.infer<typeof formSchema>> | undefined;
   render: (props: { field: any }) => React.ReactNode;
-  name: keyof z.infer<typeof TransformationFormSchema>;
+  name: keyof z.infer<typeof formSchema>;
   formLabel?: string;
   className?: string;
 };
@@ -25,8 +25,9 @@ const CustomField = ({
   formLabel,
   className,
 }: CustomFieldProps) => {
+  
   return (
-    <FormField 
+    <FormField
       control={control}
       name={name}
       render={({ field }) => (
@@ -34,8 +35,8 @@ const CustomField = ({
           {formLabel && <FormLabel>{formLabel}</FormLabel>}
           <FormControl>
             {render({ field })}
-            <FormMessage />
           </FormControl>
+          <FormMessage />
         </FormItem>
       )}
     />

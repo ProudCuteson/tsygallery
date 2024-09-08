@@ -21,8 +21,8 @@ const GalleryMobileNav = () => {
   const pathname = usePathname();
   
   return (
-    <header className='mt-8 flex w-full flex-col items-start gap-5 md:hidden'>
-      <Link href={'/gallery'} className='flex items-center gap-2 md:py-2'>
+    <header className='mt-4 w-full flex items-start justify-between gap-5 md:hidden'>
+      <Link href={'/gallery'} className='flex items-center h-[48px] pl-2 gap-2'>
         <Image
           src='/assets/images/logo-text.svg'
           alt='logo'
@@ -43,7 +43,7 @@ const GalleryMobileNav = () => {
                 className='cursor-pointer'
               />
             </SheetTrigger>
-            <SheetContent className='sm:w-64'>
+            <SheetContent className='sm:w-64 mt=10'>
               <>
               <Image 
                 src='/assets/images/logo-text.svg'
@@ -51,7 +51,7 @@ const GalleryMobileNav = () => {
                 width={152}
                 height={23}
               />
-              <ul className='flex flex-col space-y-3'>
+              <ul className='mt-10 flex flex-col space-y-5'>
             {navLinks.map((link) => {
               const isActive = link.route === pathname
               return (

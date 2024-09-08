@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import GallerySidebar from "@/components/gallery/GallerySidebar";
 import GalleryMobileNav from "@/components/gallery/GalleryMobileNav";
+import { Toaster } from '@/components/ui/toaster'
 
 export const metadata: Metadata = {
   title: "AI Gallery",
@@ -13,10 +14,15 @@ export default function GalleryLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <main className="flex flex-row">
+    <div className="flex min-h-screen w-full flex-col lg:flex-row">
       <GallerySidebar />
       <GalleryMobileNav />
-      {children}
-    </main>
+      <div className="mt-16 flex-1 overflow-auto py-8 lg:mt-0 lg:max-h-screen lg:py-10">
+        <div className="max-w-5xl px-5 md:px-10 w-full">
+          {children}
+        </div>
+      </div>
+      <Toaster />
+    </div>
   );
 }

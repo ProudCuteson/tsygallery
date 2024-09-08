@@ -1,15 +1,24 @@
 'use client'
-import { z } from 'zod'
+import { useState, useTransition } from 'react'
+import { object, z } from 'zod'
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
-import {
-  Form,
-} from "@/components/ui/form"
+import { Form } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { defaultValues } from '@/lib/gallery/constants'
+import { aspectRatioOptions, defaultValues, transformationTypes } from '@/lib/gallery/constants'
 import CustomField from './CustomField'
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue
+} from '@/components/ui/select'
+import { Button } from '@/components/ui/button'
+import { AspectRatioKey, debounce, deepMergeObjects } from '@/lib/gallery/utils'
+import MediaUploader from './MediaUploader'
 
-export const TransformationFormSchema = z.object({
+export const formSchema = z.object({
   title: z.string(),
   aspectRatio: z.string().optional(),
   color: z.string().optional(),
@@ -17,7 +26,15 @@ export const TransformationFormSchema = z.object({
   publicId: z.string(),
 });
 
-const TransformationForm = ({ action, data = null }: TransformationFormProps) => {
+const TransformationForm = ({ action, data = null, userId, type, creditBalance, config = null }: TransformationFormProps) => {
+
+  const transformationType = transformationTypes[type];
+  const [image, setImage] = useState(data);
+  const [newTransformation, setNewTransformation] = useState<Transformations | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isTransforming, setIsTransforming] = useState(false);
+  const [transformationConfig, setTransformationConfig] = useState(config);
+  const [isPending, startTransition] = useTransition();
 
   //where the data is coming from?
   const initialValues = data && action === "Update" ? {
@@ -28,26 +45,147 @@ const TransformationForm = ({ action, data = null }: TransformationFormProps) =>
     publicId: data?.publicId,
   } : defaultValues
 
-  const form = useForm<z.infer<typeof TransformationFormSchema>>({
-    resolver: zodResolver(TransformationFormSchema),
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
     defaultValues: initialValues,
   });
 
-  function onSubmit(values: z.infer<typeof TransformationFormSchema>) {
+  function onSubmit(values: z.infer<typeof formSchema>) {
     // Do something with the form values.
     console.log(values);
+  }
+
+  const onSelecteFieldHandler = (value: string, onChangeField: (value: string) => void) => {
+    const imageSizes = aspectRatioOptions[value as AspectRatioKey];
+    
+    setImage((prevState: any) => ({
+      ...prevState,
+      aspectRatio: imageSizes.aspectRatio,
+      width: imageSizes.width,
+      height: imageSizes.height,
+    }));
+
+    setNewTransformation(transformationType.config);
+
+    return onChangeField(value);
+
+  }
+
+  const onInputChangeHandler = (fieldName: string, value: string, type: string, onChangeField: (value: string) => void) => {
+    debounce(() => {
+      setNewTransformation((prevState: any) => ({
+        ...prevState,
+        [type]: {
+          ...prevState?.[type],
+          [fieldName === 'prompt' ? 'prompt' : 'to' ]: value 
+        }
+      }))
+    }, 1000)();
+      
+    return onChangeField(value)
+  }
+
+  const onTransformHandler = async () => {
+    setIsTransforming(true);
+    setTransformationConfig(deepMergeObjects(newTransformation, transformationConfig));
+    setNewTransformation(null);
+    startTransition(async () => {
+      // await updateCredits(userId, creditFee);
+    });
   }
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <CustomField 
+        <CustomField
           control={form.control}
           name="title"
           formLabel="Image Title"
           className='w-full'
-          render={ ({ field }) => <Input {...field} /> }
+          render={({ field }) => <Input {...field} />}
         />
+
+        {type === 'fill' && (
+          <CustomField
+            control={form.control}
+            name="aspectRatio"
+            formLabel="Aspect Ratio"
+            className='w-full'
+            render={({ field }) => (
+              <Select
+                onValueChange={(value) => onSelecteFieldHandler(value, field.onChange)}
+              >
+                <SelectTrigger className='w-[240px]'>
+                  <SelectValue placeholder="Select size" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.keys(aspectRatioOptions).map((key) => (
+                    <SelectItem key={key} value={key}>
+                      {aspectRatioOptions[key as AspectRatioKey].label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          />
+        )}
+
+        {(type === 'remove' || type === 'recolor') && (
+          <div>
+            <CustomField
+              control={form.control}
+              name="prompt"
+              formLabel={type === 'remove' ? "Object to remove" : "Object to ReColor"}
+              className='w-full md:w-1/2'
+              render={({ field }) => <Input {...field}
+                placeholder={type === 'remove' ? "Enter object to remove" : "Enter object to recolor"}
+                onChange={(e) => onInputChangeHandler('prompt', e.target.value, type, field.onChange)}
+              />
+              }
+            />
+            {type === 'recolor' && (
+              <CustomField
+                control={form.control}
+                name="color"
+                formLabel="Color"
+                className='w-full md:w-1/2'
+                render={({ field }) => <Input {...field}
+                  placeholder="Enter color"
+                  value={field.value}
+                  onChange={(e) => onInputChangeHandler('color', e.target.value, 'recolor', field.onChange)}
+                />}
+              />
+            )}
+          </div>
+        )}
+
+        {/* Cloudinary Transformation Preview */}
+        <div>
+          <CustomField 
+            control={form.control}
+            name="publicId"
+            formLabel="Image Preview"
+            className='flex size-full flex-col'
+            render={({ field }) =>(
+              <MediaUploader 
+                onValueChange={field.onChange}
+                setImage={setImage}
+                publicId={field.value}
+                image={image}
+                type={type}
+              />
+            )}
+          />
+        </div>
+
+        <div className='flex gap-10 w-full md:w-1/2'>
+          <Button type="button" className="w-1/2" disabled={isSubmitting || newTransformation ===null} onClick={onTransformHandler}>
+            {isTransforming ? "Transforming" : "Apply Transformation"}
+          </Button>
+          <Button type="submit" className="w-1/2" disabled={isSubmitting}>
+            {isSubmitting ? "Submitting" : `Save`}
+          </Button>
+        </div>
       </form>
     </Form>
   )

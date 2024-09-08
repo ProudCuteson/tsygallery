@@ -8,8 +8,8 @@ const UserSchema = new Schema({
   photo: { type: String, required: true },
   firstname: { type: String },
   lastname: { type: String },
-  /* planId: { type: String, default: 1 },
-  creditBlance: { type: Number, default: 10 }, */
+  planId: { type: String, default: 1 },
+  creditBlance: { type: Number, default: 10 },
 });
 
 const User = models?.User || model('User', UserSchema);
