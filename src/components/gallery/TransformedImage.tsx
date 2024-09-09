@@ -1,8 +1,10 @@
+'use client'
 import React from 'react'
+import Image from 'next/image'
 import { Button } from '../ui/button'
 import { Download } from 'lucide-react';
-import { CldImage } from 'next-cloudinary'
-import { getImageSize, dataUrl, debounce } from '@/lib/gallery/utils';
+import { CldImage, getCldImageUrl } from 'next-cloudinary'
+import { getImageSize, dataUrl, debounce, download } from '@/lib/gallery/utils';
 import { PlaceholderValue } from 'next/dist/shared/lib/get-img-props';
 
 const TransformedImage = ({
@@ -15,7 +17,15 @@ const TransformedImage = ({
   hasDownload = false,
 }: TransformedImageProps) => {
 
-  const downloadHandler = () => { };
+  const downloadHandler = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    e.preventDefault();
+    download(getCldImageUrl({
+      width: image?.width,
+      height: image?.height,
+      src: image?.publicId,
+      ...transformationConfig
+    }), title);
+  };
 
   return (
     <div className='flex flex-col gap-4'>
@@ -45,13 +55,19 @@ const TransformedImage = ({
             onError={() => {
               debounce(() => {
                 setIsTransforming && setIsTransforming(false)
-              }, 8000);
+              }, 8000)();
             }}
             {...transformationConfig}   // This is the transformation configuration
           />
 
           {isTransforming && (
-            <div className='absolute top-0 left-0 w-full h-full bg-white bg-opacity-90 flex items-center justify-center'>
+            <div className='absolute top-0 left-0 w-full h-full bg-opacity-90 flex items-center justify-center'>
+              <Image 
+                src='/assets/icons/spinner.svg'
+                width={50}
+                height={50}
+                alt='spinner'
+              />
               <p className='text-lg font-semibold'>Transforming...</p>
             </div>
           )}

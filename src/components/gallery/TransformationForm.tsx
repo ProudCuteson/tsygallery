@@ -1,6 +1,6 @@
 'use client'
-import { useState, useTransition } from 'react'
-import { object, z } from 'zod'
+import { useState, useTransition, useEffect } from 'react'
+import { z } from 'zod'
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { Form } from "@/components/ui/form"
@@ -23,6 +23,7 @@ import { creditFee } from '@/lib/gallery/constants'
 import { getCldImageUrl } from 'next-cloudinary'
 import { addImage, updateImage } from '@/actions/gallery/image.actions'
 import { useRouter } from 'next/navigation'
+import { InsufficientCreditsModal } from './InsufficientCreditsModal'
 
 export const formSchema = z.object({
   title: z.string(),
@@ -59,7 +60,7 @@ const TransformationForm = ({ action, data = null, userId, type, creditBalance, 
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
-    if ( data || image) {
+    if (data || image) {
       const transformationUrl = getCldImageUrl({
         width: image?.width,
         height: image?.height,
@@ -79,7 +80,7 @@ const TransformationForm = ({ action, data = null, userId, type, creditBalance, 
         prompt: values.prompt,
         color: values.color,
       };
-      
+
       if (action === "Add") {
         try {
 
@@ -120,7 +121,7 @@ const TransformationForm = ({ action, data = null, userId, type, creditBalance, 
           console.log(error);
         };
       };
-     };
+    };
 
     setIsSubmitting(false);
 
@@ -162,13 +163,20 @@ const TransformationForm = ({ action, data = null, userId, type, creditBalance, 
     setTransformationConfig(deepMergeObjects(newTransformation, transformationConfig));
     setNewTransformation(null);
     startTransition(async () => {
-      await updateCredits(userId, -1);
+      await updateCredits(userId, creditFee);
     });
   }
+
+  useEffect(() => {
+    if (image && (type === 'restore' || type === 'removeBackground')) {
+      setNewTransformation(transformationType.config);
+    };
+  }, [image, transformationType.config, type]);
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        {creditBalance < Math.abs(creditFee) && <InsufficientCreditsModal />}
         <CustomField
           control={form.control}
           name="title"
@@ -186,6 +194,7 @@ const TransformationForm = ({ action, data = null, userId, type, creditBalance, 
             render={({ field }) => (
               <Select
                 onValueChange={(value) => onSelecteFieldHandler(value, field.onChange)}
+                value={field.value}
               >
                 <SelectTrigger className='w-[240px]'>
                   <SelectValue placeholder="Select size" />
@@ -209,7 +218,8 @@ const TransformationForm = ({ action, data = null, userId, type, creditBalance, 
               name="prompt"
               formLabel={type === 'remove' ? "Object to remove" : "Object to ReColor"}
               className='w-full'
-              render={({ field }) => <Input {...field}
+              render={({ field }) => <Input
+                value={field.value}
                 placeholder={type === 'remove' ? "Enter object to remove" : "Enter object to recolor"}
                 onChange={(e) => onInputChangeHandler('prompt', e.target.value, type, field.onChange)}
               />
@@ -219,11 +229,11 @@ const TransformationForm = ({ action, data = null, userId, type, creditBalance, 
               <CustomField
                 control={form.control}
                 name="color"
-                formLabel="Color"
+                formLabel="Replacement Color"
                 className='w-full'
-                render={({ field }) => <Input {...field}
-                  placeholder="Enter color"
+                render={({ field }) => <Input
                   value={field.value}
+                  placeholder="Enter color"
                   onChange={(e) => onInputChangeHandler('color', e.target.value, 'recolor', field.onChange)}
                 />}
               />
