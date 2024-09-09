@@ -17,6 +17,12 @@ import {
 import { Button } from '@/components/ui/button'
 import { AspectRatioKey, debounce, deepMergeObjects } from '@/lib/gallery/utils'
 import MediaUploader from './MediaUploader'
+import TransformedImage from './TransformedImage'
+import { updateCredits } from '@/actions/gallery/user.actions'
+import { creditFee } from '@/lib/gallery/constants'
+import { getCldImageUrl } from 'next-cloudinary'
+import { addImage, updateImage } from '@/actions/gallery/image.actions'
+import { useRouter } from 'next/navigation'
 
 export const formSchema = z.object({
   title: z.string(),
@@ -35,6 +41,7 @@ const TransformationForm = ({ action, data = null, userId, type, creditBalance, 
   const [isTransforming, setIsTransforming] = useState(false);
   const [transformationConfig, setTransformationConfig] = useState(config);
   const [isPending, startTransition] = useTransition();
+  const router = useRouter();
 
   //where the data is coming from?
   const initialValues = data && action === "Update" ? {
@@ -50,14 +57,78 @@ const TransformationForm = ({ action, data = null, userId, type, creditBalance, 
     defaultValues: initialValues,
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsSubmitting(true);
+    if ( data || image) {
+      const transformationUrl = getCldImageUrl({
+        width: image?.width,
+        height: image?.height,
+        src: image?.publicId,
+        ...transformationConfig
+      });
+      const imageData = {
+        title: values.title,
+        publicId: image?.publicId,
+        transformationType: type,
+        width: image?.width,
+        height: image?.height,
+        config: transformationConfig,
+        secureURL: image?.secureURL,        //???
+        transformationURL: transformationUrl,
+        aspectRatio: values.aspectRatio,
+        prompt: values.prompt,
+        color: values.color,
+      };
+      
+      if (action === "Add") {
+        try {
+
+          const newImage = await addImage({
+            image: imageData,
+            userId,
+            path: "/gallery",
+          });
+
+          if (newImage) {
+            form.reset();
+            setImage(data);
+            router.push(`/gallery/transformations/${newImage._id}`);
+          };
+
+        } catch (error) {
+          console.log(error);
+        };
+      };
+
+      if (action === "Update") {
+        try {
+
+          const updatedImage = await updateImage({
+            image: {
+              ...imageData,
+              _id: data._id,
+            },
+            userId,
+            path: `/gallery/transformations/${data._id}`,
+          });
+
+          if (updatedImage) {
+            router.push(`/gallery/transformations/${updatedImage._id}`);
+          };
+
+        } catch (error) {
+          console.log(error);
+        };
+      };
+     };
+
+    setIsSubmitting(false);
+
   }
 
   const onSelecteFieldHandler = (value: string, onChangeField: (value: string) => void) => {
     const imageSizes = aspectRatioOptions[value as AspectRatioKey];
-    
+
     setImage((prevState: any) => ({
       ...prevState,
       aspectRatio: imageSizes.aspectRatio,
@@ -77,20 +148,21 @@ const TransformationForm = ({ action, data = null, userId, type, creditBalance, 
         ...prevState,
         [type]: {
           ...prevState?.[type],
-          [fieldName === 'prompt' ? 'prompt' : 'to' ]: value 
+          [fieldName === 'prompt' ? 'prompt' : 'to']: value
         }
       }))
     }, 1000)();
-      
+
     return onChangeField(value)
   }
 
+  // to updadte creditFee to something else
   const onTransformHandler = async () => {
     setIsTransforming(true);
     setTransformationConfig(deepMergeObjects(newTransformation, transformationConfig));
     setNewTransformation(null);
     startTransition(async () => {
-      // await updateCredits(userId, creditFee);
+      await updateCredits(userId, -1);
     });
   }
 
@@ -136,7 +208,7 @@ const TransformationForm = ({ action, data = null, userId, type, creditBalance, 
               control={form.control}
               name="prompt"
               formLabel={type === 'remove' ? "Object to remove" : "Object to ReColor"}
-              className='w-full md:w-1/2'
+              className='w-full'
               render={({ field }) => <Input {...field}
                 placeholder={type === 'remove' ? "Enter object to remove" : "Enter object to recolor"}
                 onChange={(e) => onInputChangeHandler('prompt', e.target.value, type, field.onChange)}
@@ -148,7 +220,7 @@ const TransformationForm = ({ action, data = null, userId, type, creditBalance, 
                 control={form.control}
                 name="color"
                 formLabel="Color"
-                className='w-full md:w-1/2'
+                className='w-full'
                 render={({ field }) => <Input {...field}
                   placeholder="Enter color"
                   value={field.value}
@@ -160,29 +232,45 @@ const TransformationForm = ({ action, data = null, userId, type, creditBalance, 
         )}
 
         {/* Cloudinary Transformation Preview */}
-        <div>
-          <CustomField 
-            control={form.control}
-            name="publicId"
-            formLabel="Image Preview"
-            className='flex size-full flex-col'
-            render={({ field }) =>(
-              <MediaUploader 
-                onValueChange={field.onChange}
-                setImage={setImage}
-                publicId={field.value}
+        <div className='flex w-full items-center gap-5'>
+          <div className='flex w-1/2'>
+            <CustomField
+              control={form.control}
+              name="publicId"
+              formLabel="Image Preview"
+              className='flex size-full flex-col'
+              render={({ field }) => (
+                <MediaUploader
+                  onValueChange={field.onChange}
+                  setImage={setImage}
+                  publicId={field.value}
+                  image={image}
+                  type={type}
+                />
+              )}
+            />
+          </div>
+
+          <div className='w-1/2 '>
+            <h2 className='text-lg font-bold mt-5'>Transformation Preview</h2>
+            <div className='min-h-[256px] border'>
+              <TransformedImage
                 image={image}
                 type={type}
+                title={form.getValues().title}
+                isTransforming={isTransforming}
+                setIsTransforming={setIsTransforming}
+                transformationConfig={transformationConfig}
               />
-            )}
-          />
+            </div>
+          </div>
         </div>
 
-        <div className='flex gap-10 w-full md:w-1/2'>
-          <Button type="button" className="w-1/2" disabled={isSubmitting || newTransformation ===null} onClick={onTransformHandler}>
+        <div className='flex gap-10 justify-center w-full'>
+          <Button type="button" className="w-1/4" disabled={isSubmitting || newTransformation === null} onClick={onTransformHandler}>
             {isTransforming ? "Transforming" : "Apply Transformation"}
           </Button>
-          <Button type="submit" className="w-1/2" disabled={isSubmitting}>
+          <Button type="submit" className="w-1/4" disabled={isSubmitting}>
             {isSubmitting ? "Submitting" : `Save`}
           </Button>
         </div>

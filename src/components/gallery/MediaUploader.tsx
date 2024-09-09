@@ -30,7 +30,7 @@ const MediaUploader = ({
       publicId: result?.info?.public_id,
       width: result?.info?.width,
       height: result?.info?.height,
-      secureUrl: result?.info?.secure_url,
+      secureURL: result?.info?.secure_url,
     }));
 
     onValueChange(result?.info?.public_id);
@@ -63,7 +63,7 @@ const MediaUploader = ({
       onError={onUploadErrorHandler}
     >
       {({open}) => (
-        <div className='mt-5'>
+        <div className='mt-5 gap-5'>
           <h3 className='text-lg font-semibold'>Original</h3>
           {publicId ? (
             <>
@@ -74,14 +74,14 @@ const MediaUploader = ({
                 src={publicId}
                 alt='image'
                 sizes={"(max-width: 767px) 100vw, 50vw"}
-                className='w-1/2 h-64'
+                className='min-h-64'
                 placeholder={dataUrl as PlaceholderValue}
               />
             </div>
             </>
           ):(
             <>
-            <div className='w-1/2 border min-h-[256px] items-center flex flex-col justify-center cursor-pointer' onClick={() => open()}>
+            <div className='border min-h-[256px] items-center flex flex-col justify-center cursor-pointer' onClick={() => open()}>
               <div className='flex flex-col items-center justify-center gap-y-5'>
                 <Image 
                   src="/assets/icons/add.svg"
